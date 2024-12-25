@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @sarah3278
-- 👀 I’m interested in artificial intelligence, cprogramming,c++programming,python,data structure and algorithm
-- 🌱 I’m currently studying Btech-ai from Jamia Hamdard
+- 👀 I’m interested in artificial intelligence, data science,machine learning,Python,SQL
+- 🌱 I’ve graduated from Jamia Hamdard in Btech-Artificial Intelligence
 - 💞️ I’m looking to collaborate on various tech platforms
 - 📫my email is- sarahfatimaislam@gmail.com
 
