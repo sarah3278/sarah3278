@@ -7,7 +7,8 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
-import csv
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image as ExcelImage
 
 
 DATASET_PATH = "./images"
@@ -20,9 +21,7 @@ model.eval()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
-# =========================
-# IMAGE TRANSFORM
-# =========================
+
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor()
@@ -68,7 +67,7 @@ model_lstm = LSTMModel()
 optimizer = torch.optim.Adam(model_lstm.parameters(), lr=0.01)
 criterion = nn.MSELoss()
 
-for epoch in range(10):   # reduced for speed
+for epoch in range(10):
     output = model_lstm(X)
     loss = criterion(output.squeeze(), y)
 
@@ -116,12 +115,35 @@ def run_pipeline():
 if __name__ == "__main__":
     results = run_pipeline()
 
-    with open("results.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["image", "forest_score", "deforestation_score", "temperature_score"])
-        writer.writerows(results)
+    wb = Workbook()
+    ws = wb.active
 
-    print("✅ Results saved to results.csv")
+    ws.append(["Image", "Forest Score", "Deforestation Score", "Temperature Score"])
+
+    row = 2
+
+    for img_name, forest, defor, temp in results:
+        img_path = os.path.join(DATASET_PATH, img_name)
+
+        ws.cell(row=row, column=2, value=forest)
+        ws.cell(row=row, column=3, value=defor)
+        ws.cell(row=row, column=4, value=temp)
+
+        try:
+            img = ExcelImage(img_path)
+            img.width = 80
+            img.height = 80
+            ws.add_image(img, f"A{row}")
+        except Exception as e:
+            print("Image load error:", e)
+
+        row += 1
+
+    wb.save("results.xlsx")
+
+    print(" Results saved to results.xlsx")
+
+
 
 
 
