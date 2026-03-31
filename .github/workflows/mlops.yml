@@ -20,7 +20,7 @@ jobs:
       run: pip install torch torchvision pandas numpy  pillow
 
     - name: Run code
-      run: python your_file.py
+      run: python code.py
 
     - name: Upload results
       uses: actions/upload-artifact@v4
