@@ -14,10 +14,10 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.10
+        python-version: "3.10"
 
     - name: Install libs
-      run: pip install torch torchvision pandas numpy scikit-fuzzy pillow
+      run: pip install torch torchvision pandas numpy  pillow
 
     - name: Run code
       run: python your_file.py
