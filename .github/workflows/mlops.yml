@@ -17,7 +17,7 @@ jobs:
         python-version: "3.10"
 
     - name: Install libs
-      run: pip install torch torchvision pandas numpy  pillow
+      run: pip install torch torchvision pandas numpy pillow openpyxl
 
     - name: Run code
       run: python code.py
