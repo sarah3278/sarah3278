@@ -1,23 +1,22 @@
-
+```python
 import pandas as pd
 import numpy as np
 import os
 from PIL import Image
 import torch
-
-
-
 import torch.nn as nn
 import torchvision.models as models
+import torchvision.transforms as transforms
 import csv
 
-
-
-
-
+# =========================
+# PATH
+# =========================
 DATASET_PATH = "./images"
 
-
+# =========================
+# MODEL
+# =========================
 model = models.resnet18(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
 model.eval()
@@ -25,14 +24,17 @@ model.eval()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
+# =========================
+# IMAGE TRANSFORM
+# =========================
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor()
+])
 
-
-# Load dataset (optional training)
-print("Skipping ImageFolder for GitHub run")
-
-
-
-
+# =========================
+# TEMPERATURE MODEL (LSTM)
+# =========================
 df = pd.read_csv("./all countries global temperature.csv")
 df = df[df['Country Name'] == 'India']
 
@@ -45,8 +47,7 @@ df_long = df.melt(
 
 df_long['Temperature'] = df_long['Temperature'].astype(float)
 temp_data = df_long['Temperature'].values
-max_val = np.max(temp_data)
-temp_data = temp_data / max_val
+temp_data = temp_data / np.max(temp_data)
 
 def create_sequences(data, seq_length=5):
     X, y = [], []
@@ -67,74 +68,60 @@ class LSTMModel(nn.Module):
 
     def forward(self, x):
         out, _ = self.lstm(x)
-        out = out[:, -1, :]
-        return self.fc(out)
+        return self.fc(out[:, -1, :])
 
 model_lstm = LSTMModel()
-optimizer_lstm = torch.optim.Adam(model_lstm.parameters(), lr=0.01)
-criterion_lstm = nn.MSELoss()
+optimizer = torch.optim.Adam(model_lstm.parameters(), lr=0.01)
+criterion = nn.MSELoss()
 
-for epoch in range(20):
+for epoch in range(10):   # reduced for speed
     output = model_lstm(X)
-    loss = criterion_lstm(output.squeeze(), y)
+    loss = criterion(output.squeeze(), y)
 
-    optimizer_lstm.zero_grad()
+    optimizer.zero_grad()
     loss.backward()
-    optimizer_lstm.step()
+    optimizer.step()
 
-# Predict temperature
 temp_pred = model_lstm(X[-1].unsqueeze(0)).item()
 
-
-
-
+# =========================
+# PROCESS IMAGE
+# =========================
 def process_image(image_path):
-    img = Image.open(image_path)
-    
+    img = Image.open(image_path).convert("RGB")
+    img = transform(img).unsqueeze(0).to(device)
 
     output = model(img)
     _, pred = torch.max(output, 1)
 
-    # Normalize score (0–1)
     image_score = pred.item() / 2
-
-    # Dummy deforestation score (can improve later)
     change_score = np.random.rand()
-
-    # Temperature from LSTM
     temp_score = temp_pred
-
-  
 
     return image_score, change_score, temp_score
 
 # =========================
-# MAIN PIPELINE
+# PIPELINE
 # =========================
 def run_pipeline():
     results = []
 
     files = os.listdir(DATASET_PATH)
-    print("Files found:", files)   # DEBUG
+    print("Files found:", files)
 
     for img_name in files:
-
-        # only process images
-        if not img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+        if not img_name.lower().endswith(('.jpg', '.jpeg', '.png')):
             continue
 
         img_path = os.path.join(DATASET_PATH, img_name)
 
-        try:
-            forest, defor, temp, fuzzy = process_image(img_path)
+        forest, defor, temp = process_image(img_path)
 
-            results.append([img_name, forest, defor, temp])
-            print("Processed:", img_name)
-
-        except Exception as e:
-            print("Error with", img_name, ":", e)
+        results.append([img_name, forest, defor, temp])
+        print("Processed:", img_name)
 
     return results
+
 # =========================
 # SAVE RESULTS
 # =========================
@@ -147,6 +134,9 @@ if __name__ == "__main__":
         writer.writerows(results)
 
     print("✅ Results saved to results.csv")
+```
+
+
 
 
 
