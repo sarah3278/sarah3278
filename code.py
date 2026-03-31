@@ -104,8 +104,7 @@ def process_image(image_path):
     # Temperature from LSTM
     temp_score = temp_pred
 
-    # Fuzzy logic
-    
+  
 
     return image_score, change_score, temp_score
 
@@ -115,7 +114,15 @@ def process_image(image_path):
 def run_pipeline():
     results = []
 
-    for img_name in os.listdir(DATASET_PATH):
+    files = os.listdir(DATASET_PATH)
+    print("Files found:", files)   # DEBUG
+
+    for img_name in files:
+
+        # only process images
+        if not img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+            continue
+
         img_path = os.path.join(DATASET_PATH, img_name)
 
         try:
@@ -125,10 +132,9 @@ def run_pipeline():
             print("Processed:", img_name)
 
         except Exception as e:
-            print("Error:", img_name, e)
+            print("Error with", img_name, ":", e)
 
     return results
-
 # =========================
 # SAVE RESULTS
 # =========================
