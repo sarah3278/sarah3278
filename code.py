@@ -128,7 +128,7 @@ def run_pipeline():
         try:
             forest, defor, temp, fuzzy = process_image(img_path)
 
-            results.append([img_name, forest, defor, temp, fuzzy])
+            results.append([img_name, forest, defor, temp])
             print("Processed:", img_name)
 
         except Exception as e:
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
     with open("results.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["image", "forest_score", "deforestation_score", "temperature_score", "fuzzy_score"])
+        writer.writerow(["image", "forest_score", "deforestation_score", "temperature_score"])
         writer.writerows(results)
 
     print("✅ Results saved to results.csv")
