@@ -1,4 +1,4 @@
-```python
+
 import pandas as pd
 import numpy as np
 import os
@@ -9,14 +9,10 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 import csv
 
-# =========================
-# PATH
-# =========================
+
 DATASET_PATH = "./images"
 
-# =========================
-# MODEL
-# =========================
+
 model = models.resnet18(pretrained=True)
 model.fc = nn.Linear(model.fc.in_features, 3)
 model.eval()
@@ -32,9 +28,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# =========================
-# TEMPERATURE MODEL (LSTM)
-# =========================
+
 df = pd.read_csv("./all countries global temperature.csv")
 df = df[df['Country Name'] == 'India']
 
@@ -84,9 +78,7 @@ for epoch in range(10):   # reduced for speed
 
 temp_pred = model_lstm(X[-1].unsqueeze(0)).item()
 
-# =========================
-# PROCESS IMAGE
-# =========================
+
 def process_image(image_path):
     img = Image.open(image_path).convert("RGB")
     img = transform(img).unsqueeze(0).to(device)
@@ -100,9 +92,7 @@ def process_image(image_path):
 
     return image_score, change_score, temp_score
 
-# =========================
-# PIPELINE
-# =========================
+
 def run_pipeline():
     results = []
 
@@ -122,9 +112,7 @@ def run_pipeline():
 
     return results
 
-# =========================
-# SAVE RESULTS
-# =========================
+
 if __name__ == "__main__":
     results = run_pipeline()
 
@@ -134,7 +122,7 @@ if __name__ == "__main__":
         writer.writerows(results)
 
     print("✅ Results saved to results.csv")
-```
+
 
 
 
